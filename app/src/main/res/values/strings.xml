@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Guess Presidents</string>
+    <string name="title_president_detail">President</string>
+    <string name="photo">Photo</string>
+</resources>
