@@ -3,8 +3,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// TODO: Add ImageViews
 // TODO: Use real data
+// TODO: add persistence (crud)
+// TODO: improve styling details pane
 
 public class PresidentContent {
 
