@@ -24,7 +24,7 @@ import com.squareup.picasso.Picasso;
 import net.tuurlievens.guessthings.database.ThingContract;
 import net.tuurlievens.guessthings.database.QueryHandler;
 
-// TODO: saving or adding thing in twopane mode adds whole list
+// TODO: Change image url field with native image picker
 
 public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQueryListener{
 
