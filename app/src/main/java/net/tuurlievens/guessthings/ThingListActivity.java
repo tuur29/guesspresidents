@@ -14,13 +14,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 
 import net.tuurlievens.guessthings.database.ThingContract;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ThingListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -28,13 +26,13 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
     private RecyclerView recyclerView;
     private ThingListAdapter adapter;
     private static final int LOADER_ID = 1;
+    private Bundle lastinstanceState = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing_list);
-
-        getSupportLoaderManager().restartLoader(LOADER_ID, savedInstanceState, this);
+        this.lastinstanceState = savedInstanceState;
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -140,6 +138,7 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        this.adapter.reset();
         while (data.moveToNext()) {
             this.adapter.add( new Thing(
                 data.getInt(0),
@@ -155,4 +154,9 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
     public void onLoaderReset(Loader<Cursor> loader) {
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(LOADER_ID, this.lastinstanceState, this);
+    }
 }
