@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.tuurlievens.guesspresidents">
+    package="net.tuurlievens.guessthings">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".PresidentListActivity"
+            android:name="net.tuurlievens.guessthings.ThingListActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -21,14 +21,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PresidentDetailActivity"
-            android:label="@string/title_president_detail"
-            android:parentActivityName=".PresidentListActivity"
+            android:name="net.tuurlievens.guessthings.ThingDetailActivity"
+            android:label="@string/title_thing_detail"
+            android:parentActivityName="net.tuurlievens.guessthings.ThingListActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="net.tuurlievens.guesspresidents.PresidentListActivity" />
+                android:value="net.tuurlievens.guessthings.ThingListActivity" />
         </activity>
+
+        <provider
+            android:name="net.tuurlievens.guessthings.database.ThingProvider"
+            android:authorities="net.tuurlievens.guessthings.provider"
+            android:exported="false"
+            android:protectionLevel="signature" />
+
     </application>
 
 </manifest>

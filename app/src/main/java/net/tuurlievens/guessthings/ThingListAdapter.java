@@ -1,4 +1,4 @@
-package net.tuurlievens.guesspresidents;
+package net.tuurlievens.guessthings;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,54 +15,56 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class PresidentAdapter extends RecyclerView.Adapter<PresidentAdapter.ViewHolder> {
+public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.ViewHolder> {
 
-    private final PresidentListActivity parentActivity;
-    private final List<PresidentContent.President> presidents;
+    private final ThingListActivity parentActivity;
+    private final List<Thing> things;
     private final boolean twoPane;
     private Snackbar undoRemoveSnackBar;
 
-    PresidentAdapter(PresidentListActivity parent, List<PresidentContent.President> items, boolean twoPane) {
-        this.presidents = items;
+    ThingListAdapter(ThingListActivity parent, List<Thing> items, boolean twoPane) {
+        this.things = items;
         this.parentActivity = parent;
         this.twoPane = twoPane;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.president_list_content, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.thing_list_content, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.nameView.setText(presidents.get(position).name);
+        holder.nameView.setText(things.get(position).name);
+        holder.tagsView.setText(things.get(position).tags);
 
-        Picasso.with(holder.itemView.getContext())
-                .load(presidents.get(position).imageurl)
+        if (!things.get(position).imageurl.isEmpty())
+            Picasso.with(holder.itemView.getContext())
+                .load(things.get(position).imageurl)
                 .placeholder(R.drawable.ic_file_download_accent_24dp)
                 .error(R.drawable.ic_error_red_24dp)
                 .into(holder.imageView);
 
-        holder.itemView.setTag(presidents.get(position));
+        holder.itemView.setTag(things.get(position));
 
         // load second panel or show new activity
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                PresidentContent.President president = (PresidentContent.President) view.getTag();
+                Thing thing = (Thing) view.getTag();
                 if (twoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putInt(PresidentDetailFragment.ARG_ITEM_ID, president.id);
-                    PresidentDetailFragment fragment = new PresidentDetailFragment();
+                    arguments.putInt(ThingDetailFragment.ARG_ITEM_ID, thing.id);
+                    ThingDetailFragment fragment = new ThingDetailFragment();
                     fragment.setArguments(arguments);
                     parentActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.president_detail_container, fragment)
+                        .replace(R.id.thing_detail_container, fragment)
                         .commit();
                 } else {
                     Context context = view.getContext();
-                    Intent intent = new Intent(context, PresidentDetailActivity.class);
-                    intent.putExtra(PresidentDetailFragment.ARG_ITEM_ID, president.id);
+                    Intent intent = new Intent(context, ThingDetailActivity.class);
+                    intent.putExtra(ThingDetailFragment.ARG_ITEM_ID, thing.id);
                     context.startActivity(intent);
                 }
             }
@@ -71,28 +73,26 @@ public class PresidentAdapter extends RecyclerView.Adapter<PresidentAdapter.View
 
     public void remove(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView) {
         final int position = viewHolder.getAdapterPosition();
-        final PresidentContent.President oldPresident = this.presidents.get(position);
+        final Thing oldThing = this.things.get(position);
 
         this.undoRemoveSnackBar = Snackbar
             .make(recyclerView.getRootView(), "Removed", Snackbar.LENGTH_LONG)
             .setAction("UNDO", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    presidents.add(position, oldPresident);
+                    things.add(position, oldThing);
                     notifyItemInserted(position);
                     recyclerView.scrollToPosition(position);
                 }
             });
         this.undoRemoveSnackBar.show();
 
-        this.presidents.remove(position);
+        this.things.remove(position);
         this.notifyItemRemoved(position);
     }
 
-    public void reset(List<PresidentContent.President> list) {
-        this.presidents.clear();
-        for (PresidentContent.President president : list)
-            this.presidents.add(president);
+    public void reset() {
+        this.things.clear();
         this.notifyDataSetChanged();
         if (this.undoRemoveSnackBar != null)
             this.undoRemoveSnackBar.dismiss();
@@ -100,17 +100,33 @@ public class PresidentAdapter extends RecyclerView.Adapter<PresidentAdapter.View
 
     @Override
     public int getItemCount() {
-        return presidents.size();
+        return this.things.size();
+    }
+
+    public String[] getIds() {
+        String[] ids = new String[this.things.size()];
+        int i = 0;
+        for (Thing thing: this.things)
+            ids[i++] = String.valueOf(thing.id);
+
+        return ids;
+    }
+
+    public void add(Thing item) {
+        this.things.add(item);
+        this.notifyItemInserted(this.things.size()-1);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
         final TextView nameView;
+        final TextView tagsView;
         final ImageView imageView;
 
         ViewHolder(View view) {
             super(view);
             this.nameView = view.findViewById(R.id.name);
-            this.imageView = view.findViewById(R.id.photo);
+            this.tagsView = view.findViewById(R.id.tags);
+            this.imageView = view.findViewById(R.id.image);
         }
     }
 }

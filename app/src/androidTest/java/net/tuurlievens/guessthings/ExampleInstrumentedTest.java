@@ -1,4 +1,4 @@
-package net.tuurlievens.guesspresidents;
+package net.tuurlievens.guessthings;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("net.tuurlievens.guesspresidents", appContext.getPackageName());
+        assertEquals("net.tuurlievens.guessthings", appContext.getPackageName());
     }
 }

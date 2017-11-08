@@ -1,16 +1,16 @@
-package net.tuurlievens.guesspresidents;
+package net.tuurlievens.guessthings;
 
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 
-public class PresidentDetailActivity extends AppCompatActivity {
+public class ThingDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_president_detail);
+        setContentView(R.layout.activity_thing_detail);
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -22,12 +22,12 @@ public class PresidentDetailActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             Bundle arguments = new Bundle();
-            arguments.putInt(PresidentDetailFragment.ARG_ITEM_ID,
-                getIntent().getIntExtra(PresidentDetailFragment.ARG_ITEM_ID,0));
-            PresidentDetailFragment fragment = new PresidentDetailFragment();
+            if (getIntent().hasExtra(ThingDetailFragment.ARG_ITEM_ID))
+                arguments.putInt(ThingDetailFragment.ARG_ITEM_ID, getIntent().getIntExtra(ThingDetailFragment.ARG_ITEM_ID, 0));
+            ThingDetailFragment fragment = new ThingDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
-                .add(R.id.president_detail_container, fragment)
+                .add(R.id.thing_detail_container, fragment)
                 .commit();
         }
     }

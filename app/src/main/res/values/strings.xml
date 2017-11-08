@@ -1,5 +1,15 @@
 <resources>
-    <string name="app_name">Guess Presidents</string>
-    <string name="title_president_detail">President</string>
+    <string name="app_name">Guess Things</string>
+    <string name="title_thing_detail">Thing</string>
     <string name="photo">Photo</string>
+    <string name="addthing">Add something</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
+    <string name="imageurl">Image url</string>
+    <string name="image_url">Image url</string>
+    <string name="save">Save</string>
+    <string name="name">Name</string>
+    <string name="delete">Delete</string>
+    <string name="remove">Remove thing?</string>
+    <string name="refresh">Are you sure you want to restart the game?</string>
 </resources>

@@ -1,4 +1,4 @@
-package net.tuurlievens.guesspresidents;
+package net.tuurlievens.guessthings;
 
 import org.junit.Test;
 
