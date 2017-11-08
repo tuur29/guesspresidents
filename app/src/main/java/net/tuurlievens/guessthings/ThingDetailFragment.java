@@ -8,11 +8,13 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.EditText;
@@ -85,7 +87,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.thing_detail, container, false);
+        final View rootView = inflater.inflate(R.layout.thing_detail, container, false);
         this.nameView = rootView.findViewById(R.id.thing_name);
         this.descrView = rootView.findViewById(R.id.thing_descr);
         this.tagsView = rootView.findViewById(R.id.thing_tags);
@@ -93,10 +95,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
         this.imageView = rootView.findViewById(R.id.thing_image);
 
         if (this.id != 999999999) {
-            Button deletebutton = new Button(getContext());
-            deletebutton.setBackgroundColor(Color.RED);
-            deletebutton.setTextColor(Color.WHITE);
-            deletebutton.setText(R.string.delete);
+            Button deletebutton = rootView.findViewById(R.id.delete_button);
             deletebutton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -123,7 +122,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                 }
             });
 
-            ((ViewGroup) rootView.findViewById(R.id.buttons)).addView(deletebutton,0);
+            deletebutton.setVisibility(View.VISIBLE);
         } else {
             ((ViewGroup) this.imageView.getParent()).removeView(this.imageView);
         }
@@ -136,6 +135,17 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                 String descr = descrView.getText().toString();
                 String tags = tagsView.getText().toString();
                 String imageurl = imageUrlView.getText().toString();
+
+                boolean errors = false;
+                if (name.isEmpty()) {
+                    ((TextInputLayout) rootView.findViewById(R.id.thing_name_layout)).setError(getString(R.string.nameempty));
+                    errors = true;
+                }
+                if ( !imageurl.isEmpty() && !URLUtil.isValidUrl(imageurl) ) {
+                    ((TextInputLayout) rootView.findViewById(R.id.thing_imageurl_layout)).setError(getString(R.string.invalidurl));
+                    errors = true;
+                }
+                if (errors) return;
 
                 ContentValues values = new ContentValues();
                 values.put(ThingContract.Thing.Columns.NAME, name);

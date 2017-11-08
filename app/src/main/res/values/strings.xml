@@ -12,4 +12,6 @@
     <string name="delete">Delete</string>
     <string name="remove">Remove thing?</string>
     <string name="refresh">Are you sure you want to restart the game?</string>
+    <string name="nameempty">Please fill in a name</string>
+    <string name="invalidurl">Please fill in a valid URL</string>
 </resources>
