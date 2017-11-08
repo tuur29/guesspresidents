@@ -28,6 +28,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
 
     public static final String ARG_ITEM_ID = "thingID";
     public int id = 999999999;
+    private boolean dualpane = true;
 
     private EditText nameView;
     private EditText descrView;
@@ -40,13 +41,14 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments().containsKey("seperateactivity"))
+            this.dualpane = false;
+
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             this.id = getArguments().getInt(ARG_ITEM_ID);
             Uri uri = ThingContract.Thing.buildRowUri(getArguments().getInt(ARG_ITEM_ID));
             QueryHandler handler = new QueryHandler(getContext(), this);
             handler.startQuery(QueryHandler.OperationToken.TOKEN_QUERY, null, uri, null, null, null, null);
-        } else {
-
         }
     }
 
@@ -107,7 +109,10 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                             QueryHandler queryHandler = new QueryHandler(getContext(), null);
                             queryHandler.startDelete(QueryHandler.OperationToken.TOKEN_DELETE, null,
                                     ThingContract.Thing.CONTENT_URI, selection, new String[]{String.valueOf(id)});
-                            // TODO: close activity if in activity
+                            if (!dualpane)
+                                getActivity().finish();
+                            else
+                                getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
                         }
                     });
                     builder.setNegativeButton(android.R.string.cancel, null);
@@ -146,7 +151,10 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                     queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT, null, ThingContract
                         .Thing.CONTENT_URI, values);
                 }
-                // TODO: close activity if in activity
+                if (!dualpane)
+                    getActivity().finish();
+                else if (id == 999999999)
+                    getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
             }
         });
 

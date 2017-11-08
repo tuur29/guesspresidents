@@ -22,6 +22,7 @@ public class ThingDetailActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             Bundle arguments = new Bundle();
+            arguments.putBoolean("seperateactivity",true);
             if (getIntent().hasExtra(ThingDetailFragment.ARG_ITEM_ID))
                 arguments.putInt(ThingDetailFragment.ARG_ITEM_ID, getIntent().getIntExtra(ThingDetailFragment.ARG_ITEM_ID, 0));
             ThingDetailFragment fragment = new ThingDetailFragment();
