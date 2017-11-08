@@ -34,10 +34,7 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing_list);
 
-//        if (savedInstanceState == null)
-//            getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-//        else
-            getSupportLoaderManager().restartLoader(LOADER_ID, savedInstanceState, this);
+        getSupportLoaderManager().restartLoader(LOADER_ID, savedInstanceState, this);
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
