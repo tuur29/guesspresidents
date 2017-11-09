@@ -17,13 +17,11 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
     private boolean twoPane;
     private RecyclerView recyclerView;
     private ThingListAdapter adapter;
-    private Bundle lastinstanceState = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing_list);
-        this.lastinstanceState = savedInstanceState;
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -100,21 +98,14 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        this.adapter.restartLoader(lastinstanceState);
-    }
-
     // detail fragment listener
 
     @Override
     public void updateThing(Thing thing) {
-        if (thing.id == ThingDetailFragment.NEW_ID) {
+        if (thing.id == ThingDetailFragment.NEW_ID)
             this.adapter.insert(thing);
-        } else {
+        else
             this.adapter.update(thing);
-        }
     }
 
     @Override

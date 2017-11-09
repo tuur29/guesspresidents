@@ -24,14 +24,13 @@ import net.tuurlievens.guessthings.database.ThingContract;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: dismissed things come back after other thing insert/update/delete
-
 public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.ViewHolder> implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final ThingListActivity parentActivity;
     private final QueryHandler queryHandler;
     private final List<Thing> things = new ArrayList<>();
     private final boolean twoPane;
+    private boolean loadAlreadyFinished = false;
     private static final int LOADER_ID = 1;
     private Snackbar undoRemoveSnackBar;
 
@@ -43,6 +42,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     }
 
     public void restartLoader(Bundle lastinstanceState) {
+        this.loadAlreadyFinished = false;
         parentActivity.getSupportLoaderManager().restartLoader(LOADER_ID, lastinstanceState, this);
     }
 
@@ -77,7 +77,8 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        reset();
+        if (loadAlreadyFinished) return;
+        loadAlreadyFinished = true;
         while (data.moveToNext()) {
             add( new Thing(
                     data.getInt(0),
