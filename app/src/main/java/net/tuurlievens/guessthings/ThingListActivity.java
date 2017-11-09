@@ -3,11 +3,7 @@ package net.tuurlievens.guessthings;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -16,16 +12,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
-import net.tuurlievens.guessthings.database.ThingContract;
-
-import java.util.ArrayList;
-
-public class ThingListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ThingListActivity extends AppCompatActivity {
 
     private boolean twoPane;
     private RecyclerView recyclerView;
     private ThingListAdapter adapter;
-    private static final int LOADER_ID = 1;
     private Bundle lastinstanceState = null;
 
     @Override
@@ -43,7 +34,7 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
 
         // setup recycler view
         this.recyclerView = findViewById(R.id.thing_list);
-        this.adapter = new ThingListAdapter(this, new ArrayList<Thing>(), twoPane);
+        this.adapter = new ThingListAdapter(this, savedInstanceState, twoPane);
         this.recyclerView.setAdapter(this.adapter);
 
         // allow swiping away
@@ -89,7 +80,7 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
                         adapter.reset();
-                        getSupportLoaderManager().restartLoader(LOADER_ID, null, ThingListActivity.this);
+                        adapter.restartLoader(null);
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
@@ -110,53 +101,8 @@ public class ThingListActivity extends AppCompatActivity implements LoaderManage
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {
-            ThingContract.Thing.Columns._ID,
-            ThingContract.Thing.Columns.NAME,
-            ThingContract.Thing.Columns.TAGS,
-            ThingContract.Thing.Columns.IMAGEURL
-        };
-
-        // TODO: Move to ThingProvider?
-        String selection = null;
-        String[] selectionArgs = {};
-        if (args != null && args.containsKey("possiblethings")) {
-            selectionArgs = args.getStringArray("possiblethings");
-            selection = "_id IN (";
-            for (int i = 0; i < selectionArgs.length; i++) {
-                selection += "?";
-                if (i < selectionArgs.length-1)
-                    selection += ",";
-            }
-            selection += ")";
-        }
-
-        String sortOrder = ThingContract.Thing.Columns._ID + " ASC";
-        return new CursorLoader(this, ThingContract.Thing.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        this.adapter.reset();
-        while (data.moveToNext()) {
-            this.adapter.add( new Thing(
-                data.getInt(0),
-                data.getString(1),
-                data.getString(2),
-                null,
-                data.getString(3)
-            ) );
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        getSupportLoaderManager().restartLoader(LOADER_ID, this.lastinstanceState, this);
+        this.adapter.restartLoader(lastinstanceState);
     }
 }
