@@ -89,9 +89,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                         public void onClick(DialogInterface dialog, int i)
                         {
                             listener.deleteThing(id);
-                            if (!dualpane)
-                                getActivity().finish();
-                            else
+                            if (dualpane)
                                 getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
                         }
                     });
@@ -133,9 +131,7 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                 listener.updateThing(thing);
 
                 // close panel
-                if (!dualpane)
-                    getActivity().finish();
-                else if (id == NEW_ID)
+                if (dualpane && id == NEW_ID)
                     getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
             }
         });

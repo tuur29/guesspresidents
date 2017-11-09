@@ -1,18 +1,23 @@
 package net.tuurlievens.guessthings;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 
-// TODO: edits from detail fragment dont work
+import net.tuurlievens.guessthings.database.RealQueryHandler;
 
-public class ThingDetailActivity extends AppCompatActivity {
+public class ThingDetailActivity extends AppCompatActivity implements ThingDetailFragment.ThingDetailFragmentListener {
+
+    private RealQueryHandler realQueryHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing_detail);
+        this.realQueryHandler = new RealQueryHandler(this);
         Toolbar toolbar = findViewById(R.id.detail_toolbar);
         setSupportActionBar(toolbar);
 
@@ -35,4 +40,28 @@ public class ThingDetailActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void updateThing(Thing thing) {
+        if (thing.id == ThingDetailFragment.NEW_ID)
+            this.realQueryHandler.insert(thing);
+        else
+            this.realQueryHandler.update(thing);
+
+        Intent result = new Intent();
+        result.putExtra("update","all");
+        setResult(Activity.RESULT_OK, result);
+
+        finish();
+    }
+
+    @Override
+    public void deleteThing(int id) {
+        this.realQueryHandler.delete(id);
+
+        Intent result = new Intent();
+        result.putExtra("delete",id);
+        setResult(Activity.RESULT_OK, result);
+
+        finish();
+    }
 }

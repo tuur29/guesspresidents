@@ -1,6 +1,5 @@
 package net.tuurlievens.guessthings;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -63,9 +62,8 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
                         .replace(R.id.thing_detail_container, fragment)
                         .commit();
                 } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, ThingDetailActivity.class);
-                    context.startActivity(intent);
+                    Intent intent = new Intent(view.getContext(), ThingDetailActivity.class);
+                    startActivityForResult(intent, 1);
                 }
             }
         });
@@ -78,7 +76,6 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
                 builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int i) {
                         adapter.reset();
-                        adapter.restartLoader(null);
                     }
                 });
                 builder.setNegativeButton(android.R.string.cancel, null);
@@ -94,8 +91,17 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putStringArray("possiblethings", this.adapter.getIds());
+        savedInstanceState.putStringArray("dismissedthings", this.adapter.getDismissedIds());
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Bundle bundle  = new Bundle();
+            bundle.putStringArray("dismissedthings", this.adapter.getDismissedIds());
+            this.adapter.restartLoader(bundle);
+        }
     }
 
     // detail fragment listener

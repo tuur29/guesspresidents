@@ -1,11 +1,10 @@
 package net.tuurlievens.guessthings;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -18,31 +17,37 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import net.tuurlievens.guessthings.database.QueryHandler;
-import net.tuurlievens.guessthings.database.ThingContract;
+import net.tuurlievens.guessthings.database.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.ViewHolder> implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private final ThingListActivity parentActivity;
-    private final QueryHandler queryHandler;
+    private RealQueryHandler realQueryHandler;
+    private static final int LOADER_ID = 1;
+    private final FragmentActivity parentActivity;
+
+    private List<String> dismissedthings = new ArrayList<>();
     private final List<Thing> things = new ArrayList<>();
     private final boolean twoPane;
     private boolean loadAlreadyFinished = false;
-    private static final int LOADER_ID = 1;
+
     private Snackbar undoRemoveSnackBar;
 
-    ThingListAdapter(ThingListActivity parent, Bundle savedInstanceState, boolean twoPane) {
+    ThingListAdapter(FragmentActivity parent, Bundle savedInstanceState, boolean twoPane) {
         this.parentActivity = parent;
         this.twoPane = twoPane;
-        this.queryHandler = new QueryHandler(parentActivity, null);
+        this.realQueryHandler = new RealQueryHandler(parent);
+
         restartLoader(savedInstanceState);
     }
 
     public void restartLoader(Bundle lastinstanceState) {
         this.loadAlreadyFinished = false;
+        this.things.clear();
+        notifyDataSetChanged();
         parentActivity.getSupportLoaderManager().restartLoader(LOADER_ID, lastinstanceState, this);
     }
 
@@ -51,18 +56,19 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {
-                ThingContract.Thing.Columns._ID,
-                ThingContract.Thing.Columns.NAME,
-                ThingContract.Thing.Columns.TAGS,
-                ThingContract.Thing.Columns.IMAGEURL
+            ThingContract.Thing.Columns._ID,
+            ThingContract.Thing.Columns.NAME,
+            ThingContract.Thing.Columns.TAGS,
+            ThingContract.Thing.Columns.IMAGEURL
         };
 
-        // TODO: Move to ThingProvider?
+        // filter out dismissed
         String selection = null;
         String[] selectionArgs = {};
-        if (args != null && args.containsKey("possiblethings")) {
-            selectionArgs = args.getStringArray("possiblethings");
-            selection = "_id IN (";
+        if (args != null && args.containsKey("dismissedthings")) {
+            selectionArgs = args.getStringArray("dismissedthings");
+            this.dismissedthings = Arrays.asList(selectionArgs);
+            selection = "_id NOT IN (";
             for (int i = 0; i < selectionArgs.length; i++) {
                 selection += "?";
                 if (i < selectionArgs.length-1)
@@ -109,13 +115,8 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         return -1;
     }
 
-    public String[] getIds() {
-        String[] ids = new String[this.things.size()];
-        int i = 0;
-        for (Thing thing: this.things)
-            ids[i++] = String.valueOf(thing.id);
-
-        return ids;
+    public String[] getDismissedIds() {
+        return dismissedthings.toArray(new String[dismissedthings.size()]);
     }
 
     // make views
@@ -154,10 +155,9 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
                         .replace(R.id.thing_detail_container, fragment)
                         .commit();
                 } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, ThingDetailActivity.class);
+                    Intent intent = new Intent(parentActivity, ThingDetailActivity.class);
                     intent.putExtra(ThingDetailFragment.ARG_ITEM_ID, thing.id);
-                    context.startActivity(intent);
+                    parentActivity.startActivityForResult(intent, 1);
                 }
             }
         });
@@ -178,7 +178,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     public void dismiss(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView) {
         final int position = viewHolder.getAdapterPosition();
         final Thing oldThing = this.things.get(position);
-
+        this.dismissedthings.add(String.valueOf(oldThing.id));
         this.undoRemoveSnackBar = Snackbar
             .make(recyclerView.getRootView(), "Removed", Snackbar.LENGTH_LONG)
             .setAction("UNDO", new View.OnClickListener() {
@@ -198,30 +198,17 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         this.notifyDataSetChanged();
         if (this.undoRemoveSnackBar != null)
             this.undoRemoveSnackBar.dismiss();
+        restartLoader(null);
     }
 
     public void insert(Thing thing) {
-
-        ContentValues values = convertToContentValues(thing);
-
-        this.queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT,
-            null, ThingContract.Thing.CONTENT_URI, values);
-
+        this.realQueryHandler.insert(thing);
         // TODO: set thing to have new id
-
         add(thing);
     }
 
     public void update(Thing thing) {
-
-        ContentValues values = convertToContentValues(thing);
-
-        // make query
-        String selection = ThingContract.Thing.Columns._ID + " = ?";
-        String[] selectionArg = {String.valueOf(thing.id)};
-        this.queryHandler.startUpdate(QueryHandler.OperationToken.TOKEN_UPDATE,
-            null, ThingContract.Thing.CONTENT_URI, values, selection, selectionArg);
-
+        this.realQueryHandler.update(thing);
         // update recycler
         int pos = getPositionById(thing.id);
         this.things.set(pos, thing);
@@ -229,20 +216,8 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     }
 
     public void delete(int id) {
-        String selection = ThingContract.Thing.Columns._ID + " = ?";
-        this.queryHandler.startDelete(QueryHandler.OperationToken.TOKEN_DELETE,
-            null, ThingContract.Thing.CONTENT_URI, selection, new String[]{String.valueOf(id)});
-
+        this.realQueryHandler.delete(id);
         remove(getPositionById(id));
-    }
-
-    private ContentValues convertToContentValues(Thing thing) {
-        ContentValues values = new ContentValues();
-        values.put(ThingContract.Thing.Columns.NAME, thing.name);
-        values.put(ThingContract.Thing.Columns.DESCRIPTION, thing.descr);
-        values.put(ThingContract.Thing.Columns.TAGS, thing.tags);
-        values.put(ThingContract.Thing.Columns.IMAGEURL, thing.imageurl);
-        return values;
     }
 
     // viewholder
