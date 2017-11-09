@@ -5,6 +5,8 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 
+// TODO: edits from detail fragment dont work
+
 public class ThingDetailActivity extends AppCompatActivity {
 
     @Override

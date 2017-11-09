@@ -12,7 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
-public class ThingListActivity extends AppCompatActivity {
+public class ThingListActivity extends AppCompatActivity implements ThingDetailFragment.ThingDetailFragmentListener {
 
     private boolean twoPane;
     private RecyclerView recyclerView;
@@ -46,7 +46,7 @@ public class ThingListActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                adapter.remove(viewHolder, recyclerView);
+                adapter.dismiss(viewHolder, recyclerView);
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
@@ -104,5 +104,21 @@ public class ThingListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         this.adapter.restartLoader(lastinstanceState);
+    }
+
+    // detail fragment listener
+
+    @Override
+    public void updateThing(Thing thing) {
+        if (thing.id == ThingDetailFragment.NEW_ID) {
+            this.adapter.insert(thing);
+        } else {
+            this.adapter.update(thing);
+        }
+    }
+
+    @Override
+    public void deleteThing(int id) {
+        this.adapter.delete(id);
     }
 }

@@ -1,5 +1,6 @@
 package net.tuurlievens.guessthings;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,14 +18,18 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import net.tuurlievens.guessthings.database.QueryHandler;
 import net.tuurlievens.guessthings.database.ThingContract;
 
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: dismissed things come back after other thing insert/update/delete
+
 public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.ViewHolder> implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final ThingListActivity parentActivity;
+    private final QueryHandler queryHandler;
     private final List<Thing> things = new ArrayList<>();
     private final boolean twoPane;
     private static final int LOADER_ID = 1;
@@ -33,6 +38,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     ThingListAdapter(ThingListActivity parent, Bundle savedInstanceState, boolean twoPane) {
         this.parentActivity = parent;
         this.twoPane = twoPane;
+        this.queryHandler = new QueryHandler(parentActivity, null);
         restartLoader(savedInstanceState);
     }
 
@@ -91,6 +97,17 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         return this.things.size();
     }
 
+    public int getPositionById(int id) {
+        int i = 0;
+        for (Thing thing : this.things) {
+            if (thing.id == id) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+
     public String[] getIds() {
         String[] ids = new String[this.things.size()];
         int i = 0;
@@ -145,31 +162,34 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         });
     }
 
-    // manage data
+    // manage recyclerview
 
-    public void add(Thing item) {
-        this.things.add(item);
+    public void add(Thing thing) {
+        this.things.add(thing);
         this.notifyItemInserted(this.things.size()-1);
     }
 
-    public void remove(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView) {
+    public void remove(int position) {
+        this.things.remove(position);
+        this.notifyItemRemoved(position);
+    }
+
+    public void dismiss(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView) {
         final int position = viewHolder.getAdapterPosition();
         final Thing oldThing = this.things.get(position);
 
         this.undoRemoveSnackBar = Snackbar
-                .make(recyclerView.getRootView(), "Removed", Snackbar.LENGTH_LONG)
-                .setAction("UNDO", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        things.add(position, oldThing);
-                        notifyItemInserted(position);
-                        recyclerView.scrollToPosition(position);
-                    }
-                });
+            .make(recyclerView.getRootView(), "Removed", Snackbar.LENGTH_LONG)
+            .setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    things.add(position, oldThing);
+                    notifyItemInserted(position);
+                    recyclerView.scrollToPosition(position);
+                }
+            });
+        remove(position);
         this.undoRemoveSnackBar.show();
-
-        this.things.remove(position);
-        this.notifyItemRemoved(position);
     }
 
     public void reset() {
@@ -177,6 +197,51 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         this.notifyDataSetChanged();
         if (this.undoRemoveSnackBar != null)
             this.undoRemoveSnackBar.dismiss();
+    }
+
+    public void insert(Thing thing) {
+
+        ContentValues values = convertToContentValues(thing);
+
+        this.queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT,
+            null, ThingContract.Thing.CONTENT_URI, values);
+
+        // TODO: set thing to have new id
+
+        add(thing);
+    }
+
+    public void update(Thing thing) {
+
+        ContentValues values = convertToContentValues(thing);
+
+        // make query
+        String selection = ThingContract.Thing.Columns._ID + " = ?";
+        String[] selectionArg = {String.valueOf(thing.id)};
+        this.queryHandler.startUpdate(QueryHandler.OperationToken.TOKEN_UPDATE,
+            null, ThingContract.Thing.CONTENT_URI, values, selection, selectionArg);
+
+        // update recycler
+        int pos = getPositionById(thing.id);
+        this.things.set(pos, thing);
+        notifyItemChanged(pos);
+    }
+
+    public void delete(int id) {
+        String selection = ThingContract.Thing.Columns._ID + " = ?";
+        this.queryHandler.startDelete(QueryHandler.OperationToken.TOKEN_DELETE,
+            null, ThingContract.Thing.CONTENT_URI, selection, new String[]{String.valueOf(id)});
+
+        remove(getPositionById(id));
+    }
+
+    private ContentValues convertToContentValues(Thing thing) {
+        ContentValues values = new ContentValues();
+        values.put(ThingContract.Thing.Columns.NAME, thing.name);
+        values.put(ThingContract.Thing.Columns.DESCRIPTION, thing.descr);
+        values.put(ThingContract.Thing.Columns.TAGS, thing.tags);
+        values.put(ThingContract.Thing.Columns.IMAGEURL, thing.imageurl);
+        return values;
     }
 
     // viewholder

@@ -1,7 +1,7 @@
 package net.tuurlievens.guessthings;
 
 import android.app.Activity;
-import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
@@ -28,8 +28,11 @@ import net.tuurlievens.guessthings.database.QueryHandler;
 public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQueryListener{
 
     public static final String ARG_ITEM_ID = "thingID";
-    public int id = 999999999;
+    public static final int NEW_ID = 999999999;
+
+    private int id = NEW_ID;
     private boolean dualpane = true;
+    private ThingDetailFragmentListener listener;
 
     private EditText nameView;
     private EditText descrView;
@@ -40,10 +43,21 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
     public ThingDetailFragment() {}
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof ThingDetailFragmentListener)
+            listener = (ThingDetailFragmentListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement ThingDetailFragmentListener");
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments().containsKey("seperateactivity"))
             this.dualpane = false;
+
+        // get data
 
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             this.id = getArguments().getInt(ARG_ITEM_ID);
@@ -52,6 +66,84 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
             handler.startQuery(QueryHandler.OperationToken.TOKEN_QUERY, null, uri, null, null, null, null);
         }
     }
+
+    // make view
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final View rootView = inflater.inflate(R.layout.thing_detail, container, false);
+        this.nameView = rootView.findViewById(R.id.thing_name);
+        this.descrView = rootView.findViewById(R.id.thing_descr);
+        this.tagsView = rootView.findViewById(R.id.thing_tags);
+        this.imageUrlView = rootView.findViewById(R.id.thing_imageurl);
+        this.imageView = rootView.findViewById(R.id.thing_image);
+
+        if (this.id != NEW_ID) {
+            Button deletebutton = rootView.findViewById(R.id.delete_button);
+            deletebutton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int i)
+                        {
+                            listener.deleteThing(id);
+                            if (!dualpane)
+                                getActivity().finish();
+                            else
+                                getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
+                        }
+                    });
+                    builder.setNegativeButton(android.R.string.cancel, null);
+                    AlertDialog dialog = builder.create();
+                    dialog.setCancelable(true);
+                    dialog.setMessage(getResources().getString(R.string.remove));
+                    dialog.show();
+                }
+            });
+
+            deletebutton.setVisibility(View.VISIBLE);
+        } else {
+            ((ViewGroup) this.imageView.getParent()).removeView(this.imageView);
+        }
+
+        rootView.findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String name = nameView.getText().toString();
+                String tags = tagsView.getText().toString();
+                String descr = descrView.getText().toString();
+                String imageurl = imageUrlView.getText().toString();
+
+                // form validation
+                boolean errors = false;
+                if (name.isEmpty()) {
+                    ((TextInputLayout) rootView.findViewById(R.id.thing_name_layout)).setError(getString(R.string.nameempty));
+                    errors = true;
+                }
+                if ( !imageurl.isEmpty() && !URLUtil.isValidUrl(imageurl) ) {
+                    ((TextInputLayout) rootView.findViewById(R.id.thing_imageurl_layout)).setError(getString(R.string.invalidurl));
+                    errors = true;
+                }
+                if (errors) return;
+
+                // save
+                Thing thing = new Thing(id, name, tags, descr, imageurl);
+                listener.updateThing(thing);
+
+                // close panel
+                if (!dualpane)
+                    getActivity().finish();
+                else if (id == NEW_ID)
+                    getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
+            }
+        });
+
+        return rootView;
+    }
+
+    // fill view with data
 
     @Override
     public void onQueryComplete(int token, Object cookie, Cursor cursor) {
@@ -77,97 +169,16 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
                     .placeholder(R.drawable.ic_file_download_accent_24dp)
                     .error(R.drawable.ic_error_red_24dp)
                     .into(this.imageView);
-            else if (this.id != 999999999)
+            else if (this.id != NEW_ID)
                 ((ViewGroup) this.imageView.getParent()).removeView(this.imageView);
 
             cursor.close();
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.thing_detail, container, false);
-        this.nameView = rootView.findViewById(R.id.thing_name);
-        this.descrView = rootView.findViewById(R.id.thing_descr);
-        this.tagsView = rootView.findViewById(R.id.thing_tags);
-        this.imageUrlView = rootView.findViewById(R.id.thing_imageurl);
-        this.imageView = rootView.findViewById(R.id.thing_image);
-
-        if (this.id != 999999999) {
-            Button deletebutton = rootView.findViewById(R.id.delete_button);
-            deletebutton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int i)
-                        {
-                            String selection = ThingContract.Thing.Columns._ID + " = ?";
-                            QueryHandler queryHandler = new QueryHandler(getContext(), null);
-                            queryHandler.startDelete(QueryHandler.OperationToken.TOKEN_DELETE, null,
-                                    ThingContract.Thing.CONTENT_URI, selection, new String[]{String.valueOf(id)});
-                            if (!dualpane)
-                                getActivity().finish();
-                            else
-                                getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
-                        }
-                    });
-                    builder.setNegativeButton(android.R.string.cancel, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.setCancelable(true);
-                    dialog.setMessage(getResources().getString(R.string.remove));
-                    dialog.show();
-                }
-            });
-
-            deletebutton.setVisibility(View.VISIBLE);
-        } else {
-            ((ViewGroup) this.imageView.getParent()).removeView(this.imageView);
-        }
-
-        rootView.findViewById(R.id.save_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                QueryHandler queryHandler = new QueryHandler(getContext(), null);
-                String name = nameView.getText().toString();
-                String descr = descrView.getText().toString();
-                String tags = tagsView.getText().toString();
-                String imageurl = imageUrlView.getText().toString();
-
-                boolean errors = false;
-                if (name.isEmpty()) {
-                    ((TextInputLayout) rootView.findViewById(R.id.thing_name_layout)).setError(getString(R.string.nameempty));
-                    errors = true;
-                }
-                if ( !imageurl.isEmpty() && !URLUtil.isValidUrl(imageurl) ) {
-                    ((TextInputLayout) rootView.findViewById(R.id.thing_imageurl_layout)).setError(getString(R.string.invalidurl));
-                    errors = true;
-                }
-                if (errors) return;
-
-                ContentValues values = new ContentValues();
-                values.put(ThingContract.Thing.Columns.NAME, name);
-                values.put(ThingContract.Thing.Columns.DESCRIPTION, descr);
-                values.put(ThingContract.Thing.Columns.TAGS, tags);
-                values.put(ThingContract.Thing.Columns.IMAGEURL, imageurl);
-                if (id != 999999999) {
-                    String selection = ThingContract.Thing.Columns._ID + " = ?";
-                    String[] selectionArg = {String.valueOf(id)};
-                    queryHandler.startUpdate(QueryHandler.OperationToken.TOKEN_UPDATE, null, ThingContract
-                        .Thing.CONTENT_URI, values, selection, selectionArg);
-                } else {
-                    queryHandler.startInsert(QueryHandler.OperationToken.TOKEN_INSERT, null, ThingContract
-                        .Thing.CONTENT_URI, values);
-                }
-                if (!dualpane)
-                    getActivity().finish();
-                else if (id == 999999999)
-                    getActivity().getSupportFragmentManager().beginTransaction().remove(ThingDetailFragment.this).commit();
-            }
-        });
-
-        return rootView;
+    public interface ThingDetailFragmentListener {
+        void updateThing(Thing thing);
+        void deleteThing(int id);
     }
 
 }
