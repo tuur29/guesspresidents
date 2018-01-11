@@ -59,6 +59,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
             ThingContract.Thing.Columns._ID,
             ThingContract.Thing.Columns.NAME,
             ThingContract.Thing.Columns.TAGS,
+            ThingContract.Thing.Columns.DESCRIPTION,
             ThingContract.Thing.Columns.IMAGEURL
         };
 
@@ -90,8 +91,8 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
                     data.getInt(0),
                     data.getString(1),
                     data.getString(2),
-                    null,
-                    data.getString(3)
+                    data.getString(3),
+                    data.getString(4)
             ) );
         }
     }
@@ -130,7 +131,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.nameView.setText(things.get(position).name);
-        holder.tagsView.setText(things.get(position).tags);
+        holder.descrView.setText(things.get(position).descr);
 
         if (!things.get(position).imageurl.isEmpty())
             Picasso.with(holder.itemView.getContext())
@@ -224,13 +225,13 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
 
     class ViewHolder extends RecyclerView.ViewHolder {
         final TextView nameView;
-        final TextView tagsView;
+        final TextView descrView;
         final ImageView imageView;
 
         ViewHolder(View view) {
             super(view);
             this.nameView = view.findViewById(R.id.name);
-            this.tagsView = view.findViewById(R.id.tags);
+            this.descrView = view.findViewById(R.id.descr);
             this.imageView = view.findViewById(R.id.image);
         }
     }

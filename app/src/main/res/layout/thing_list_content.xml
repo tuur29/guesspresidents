@@ -18,12 +18,12 @@
 
         <ImageView
             android:id="@+id/image"
-            android:layout_width="wrap_content"
+            android:layout_width="60dp"
             android:layout_height="60dp"
-            android:scaleType="fitXY"
-            android:adjustViewBounds="true"
             android:layout_margin="10dp"
-            android:contentDescription="@string/photo" />
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/photo"
+            android:scaleType="centerInside" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -35,12 +35,14 @@
                 android:id="@+id/name"
                 style="?android:attr/textAppearanceLarge"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="-3dp" />
 
             <TextView
-                android:id="@+id/tags"
+                android:id="@+id/descr"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:lines="2" />
 
         </LinearLayout>
 
