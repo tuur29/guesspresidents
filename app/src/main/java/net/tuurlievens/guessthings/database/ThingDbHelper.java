@@ -23,9 +23,18 @@ public class ThingDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    private String generateInsertQuery(String name, String description, String tags, String imageurl) {
+        return "INSERT INTO " + ThingContract.Thing.TABLE_NAME
+                + "(" + Columns.NAME + "," + Columns.DESCRIPTION + "," + Columns.TAGS + "," + Columns.IMAGEURL + ")"
+                + "VALUES ('"+name+"', '"+description+"','"+tags+"','"+imageurl+"')";
+    }
+
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(CREATE_TABLE_Thing);
+        sqLiteDatabase.execSQL(generateInsertQuery("Lamp","A magic device that generates light","home,device,light,electricity","https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/White_lamp.JPG/352px-White_lamp.JPG"));
+        sqLiteDatabase.execSQL(generateInsertQuery("Duck","A bird that lives on water and makes squawking noises","animal,bird,water","https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Anas_falcata.JPG/480px-Anas_falcata.JPG"));
+        sqLiteDatabase.execSQL(generateInsertQuery("Machu Picchu","An ancient ruin high up in the mountains","place,inca,ruin","https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/80_-_Machu_Picchu_-_Juin_2009_-_edit.2.jpg/492px-80_-_Machu_Picchu_-_Juin_2009_-_edit.2.jpg"));
     }
 
     @Override
