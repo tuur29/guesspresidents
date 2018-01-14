@@ -172,6 +172,12 @@ public class ThingDetailFragment extends Fragment implements QueryHandler.AsyncQ
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        MainApplication.getRefWatcher(getActivity()).watch(this);
+    }
+
     public interface ThingDetailFragmentListener {
         void updateThing(Thing thing);
         void deleteThing(int id);
