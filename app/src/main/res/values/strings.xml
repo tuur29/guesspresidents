@@ -14,4 +14,5 @@
     <string name="refresh">Are you sure you want to restart the game?</string>
     <string name="nameempty">Please fill in a name</string>
     <string name="invalidurl">Please fill in a valid URL</string>
+    <string name="longpressmsg">Long press the add button to reset the game</string>
 </resources>

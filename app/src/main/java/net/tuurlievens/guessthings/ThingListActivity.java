@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.Toast;
 
 public class ThingListActivity extends AppCompatActivity implements ThingDetailFragment.ThingDetailFragmentListener {
 
@@ -21,6 +22,9 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_thing_list);
+
+        if (savedInstanceState == null)
+            Toast.makeText(this, R.string.longpressmsg, Toast.LENGTH_SHORT).show();
 
         // setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
