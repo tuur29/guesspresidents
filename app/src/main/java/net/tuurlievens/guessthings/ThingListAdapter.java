@@ -47,6 +47,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     public void restartLoader(Bundle lastinstanceState) {
         this.loadAlreadyFinished = false;
         this.things.clear();
+        this.dismissedthings.clear();
         notifyDataSetChanged();
         parentActivity.getSupportLoaderManager().restartLoader(LOADER_ID, lastinstanceState, this);
     }
@@ -179,6 +180,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     public void dismiss(final RecyclerView.ViewHolder viewHolder, final RecyclerView recyclerView) {
         final int position = viewHolder.getAdapterPosition();
         final Thing oldThing = this.things.get(position);
+        final int dismissedIndex = this.dismissedthings.size();
         this.dismissedthings.add(String.valueOf(oldThing.id));
         this.undoRemoveSnackBar = Snackbar
             .make(recyclerView.getRootView(), "Removed", Snackbar.LENGTH_LONG)
@@ -186,6 +188,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
                 @Override
                 public void onClick(View view) {
                     things.add(position, oldThing);
+                    dismissedthings.remove(dismissedIndex);
                     notifyItemInserted(position);
                     recyclerView.scrollToPosition(position);
                 }
@@ -195,8 +198,6 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
     }
 
     public void reset() {
-        this.things.clear();
-        this.notifyDataSetChanged();
         if (this.undoRemoveSnackBar != null)
             this.undoRemoveSnackBar.dismiss();
         restartLoader(null);
