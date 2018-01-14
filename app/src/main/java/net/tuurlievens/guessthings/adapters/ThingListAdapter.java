@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings;
+package net.tuurlievens.guessthings.adapters;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,7 +17,11 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import net.tuurlievens.guessthings.database.*;
+import net.tuurlievens.guessthings.R;
+import net.tuurlievens.guessthings.fragments.ThingDetailFragment;
+import net.tuurlievens.guessthings.activities.ThingDetailActivity;
+import net.tuurlievens.guessthings.models.Thing;
+import net.tuurlievens.guessthings.persistency.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +40,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
 
     private Snackbar undoRemoveSnackBar;
 
-    ThingListAdapter(FragmentActivity parent, Bundle savedInstanceState, boolean twoPane) {
+    public ThingListAdapter(FragmentActivity parent, Bundle savedInstanceState, boolean twoPane) {
         this.parentActivity = parent;
         this.twoPane = twoPane;
         this.realQueryHandler = new RealQueryHandler(parent);

@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings.database;
+package net.tuurlievens.guessthings.persistency;
 
 import android.content.ContentUris;
 import android.net.Uri;

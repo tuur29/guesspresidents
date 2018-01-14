@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings;
+package net.tuurlievens.guessthings.models;
 
 // TODO: add abiliy to search in recyclerview?
 
@@ -9,7 +9,7 @@ public class Thing {
     public final String descr;
     public final String imageurl;
 
-    Thing(int id, String name, String tags, String descr, String imageurl) {
+    public Thing(int id, String name, String tags, String descr, String imageurl) {
         this.id = id;
         this.name = name;
         this.tags = tags;

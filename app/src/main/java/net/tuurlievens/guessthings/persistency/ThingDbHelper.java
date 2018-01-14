@@ -1,10 +1,10 @@
-package net.tuurlievens.guessthings.database;
+package net.tuurlievens.guessthings.persistency;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import net.tuurlievens.guessthings.database.ThingContract.Thing.Columns;
+import net.tuurlievens.guessthings.persistency.ThingContract.Thing.Columns;
 
 public class ThingDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;

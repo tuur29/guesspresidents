@@ -9,10 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 
+import net.tuurlievens.guessthings.activities.ThingListActivity;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

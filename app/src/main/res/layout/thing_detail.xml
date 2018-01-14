@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
-    tools:context="net.tuurlievens.guessthings.ThingDetailFragment">
+    tools:context="net.tuurlievens.guessthings.fragments.ThingDetailFragment">
 
     <ImageView
         android:id="@+id/thing_image"

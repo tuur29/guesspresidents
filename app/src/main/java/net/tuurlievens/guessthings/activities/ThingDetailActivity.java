@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings;
+package net.tuurlievens.guessthings.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,7 +7,10 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 
-import net.tuurlievens.guessthings.database.RealQueryHandler;
+import net.tuurlievens.guessthings.R;
+import net.tuurlievens.guessthings.fragments.ThingDetailFragment;
+import net.tuurlievens.guessthings.models.Thing;
+import net.tuurlievens.guessthings.persistency.RealQueryHandler;
 
 public class ThingDetailActivity extends AppCompatActivity implements ThingDetailFragment.ThingDetailFragmentListener {
 

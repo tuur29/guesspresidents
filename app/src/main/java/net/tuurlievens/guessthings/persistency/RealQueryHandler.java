@@ -1,9 +1,9 @@
-package net.tuurlievens.guessthings.database;
+package net.tuurlievens.guessthings.persistency;
 
 import android.app.Activity;
 import android.content.ContentValues;
 
-import net.tuurlievens.guessthings.Thing;
+import net.tuurlievens.guessthings.models.Thing;
 
 public class RealQueryHandler {
 

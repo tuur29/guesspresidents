@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings;
+package net.tuurlievens.guessthings.fragments;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,8 +20,10 @@ import android.widget.EditText;
 
 import com.squareup.picasso.Picasso;
 
-import net.tuurlievens.guessthings.database.ThingContract;
-import net.tuurlievens.guessthings.database.QueryHandler;
+import net.tuurlievens.guessthings.R;
+import net.tuurlievens.guessthings.models.Thing;
+import net.tuurlievens.guessthings.persistency.ThingContract;
+import net.tuurlievens.guessthings.persistency.QueryHandler;
 
 // TODO: Change image url field with native image picker
 

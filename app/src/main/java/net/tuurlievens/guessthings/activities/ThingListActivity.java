@@ -1,4 +1,4 @@
-package net.tuurlievens.guessthings;
+package net.tuurlievens.guessthings.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +11,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Toast;
+
+import net.tuurlievens.guessthings.R;
+import net.tuurlievens.guessthings.fragments.ThingDetailFragment;
+import net.tuurlievens.guessthings.adapters.ThingListAdapter;
+import net.tuurlievens.guessthings.models.Thing;
 
 public class ThingListActivity extends AppCompatActivity implements ThingDetailFragment.ThingDetailFragmentListener {
 
