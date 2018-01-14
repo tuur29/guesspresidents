@@ -68,7 +68,7 @@ public class ThingListAdapter extends RecyclerView.Adapter<ThingListAdapter.View
         String[] selectionArgs = {};
         if (args != null && args.containsKey("dismissedthings")) {
             selectionArgs = args.getStringArray("dismissedthings");
-            this.dismissedthings = Arrays.asList(selectionArgs);
+            this.dismissedthings = new ArrayList<>(Arrays.asList(selectionArgs));
             selection = "_id NOT IN (";
             for (int i = 0; i < selectionArgs.length; i++) {
                 selection += "?";
