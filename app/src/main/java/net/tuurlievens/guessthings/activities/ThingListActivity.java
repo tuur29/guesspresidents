@@ -107,20 +107,27 @@ public class ThingListActivity extends AppCompatActivity implements ThingDetailF
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == RESULT_OK) {
-            Bundle bundle  = new Bundle();
-            bundle.putStringArray("dismissedthings", this.adapter.getDismissedIds());
-            this.adapter.restartLoader(bundle);
+            resetAdapter();
         }
     }
 
     // detail fragment listener
 
+    private void resetAdapter() {
+        Bundle bundle = new Bundle();
+        bundle.putStringArray("dismissedthings", this.adapter.getDismissedIds());
+        this.adapter = new ThingListAdapter(this, bundle, twoPane);
+        this.recyclerView.setAdapter(this.adapter);
+    }
+
     @Override
     public void updateThing(Thing thing) {
-        if (thing.id == ThingDetailFragment.NEW_ID)
+        if (thing.id == ThingDetailFragment.NEW_ID) {
             this.adapter.insert(thing);
-        else
+            resetAdapter();
+        } else {
             this.adapter.update(thing);
+        }
     }
 
     @Override
